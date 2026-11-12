@@ -1,6 +1,16 @@
 sisu
 
-sisu is a local-first AI coding system designed to make Small Language Models (SLMs) significantly more capable through external intelligence, deterministic tools, and structured execution.
+It is is a model-agnostic, tool-augmented execution engine designed to help AI models complete complex tasks reliably from start to finish.
+
+The model is interchangeable. The execution infrastructure is the product.
+
+That means sisu could work with:
+
+- A local 7B model running on a normal consumer hardware.
+- A 32B or 70B model running on an RTX GPU or Mac Studio.
+- An inexpensive cloud model from OpenAI, Anthropic, or another provider.
+- Our own specialized model trained specifically to work with sisu's orchestration and tools.
+  And the tools wouldn't have to be limited to coding. Design, CAD, documents, research, security, spreadsheets, and other domains could eventually become part of the same ecosystem.
 
 This ain't another AI coding assistant.
 
