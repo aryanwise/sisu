@@ -4,8 +4,8 @@ use sisu_core::{
 
 #[tokio::main]
 async fn main() {
-    let model_name = "qwen2.5-coder:7b";
-    // let model_name = "qwen2.5-coder:3b";
+    // let model_name = "qwen2.5-coder:7b";
+    let model_name = "qwen2.5-coder:3b";
 
     loop {
         let current_mode = match select_mode() {
