@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/sisu-core",
+    "crates/sisu-cli"
+]
+resolver = "2"

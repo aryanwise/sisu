@@ -1,0 +1,14 @@
+# Rust
+target/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+.env.*
+
+# Editor
+.vscode/

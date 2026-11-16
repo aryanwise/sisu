@@ -1,0 +1,95 @@
+# v1 file struct
+sisu/
+│
+├── Cargo.toml                 # Rust workspace
+├── Cargo.lock
+│
+├── crates/
+│   ├── sisu-core/             # Core orchestration logic
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   │       └── lib.rs
+│   │
+│   └── sisu-cli/              # CLI application
+│       ├── Cargo.toml
+│       └── src/
+│           └── main.rs
+│
+├── research/
+│   └── repair-lab/            # Python research environment
+│       ├── pyproject.toml
+│       ├── uv.lock
+│       └── main.py
+│
+├── extension/                 # VS Code extension (later)
+│
+├── docs/                      # Architecture and research notes
+│
+└── .gitignore
+
+# Development Tracks
+              PROJECT SISU
+                   │
+        ┌──────────┴──────────┐
+        │                     │
+        ▼                     ▼
+   RUST DEVELOPMENT      PYTHON RESEARCH
+        │                     │
+   Task Planning         Error Datasets
+   Model APIs            Neural Models
+   Tool Execution        Model Training
+   Verification          Evaluation
+        │                     │
+        ▼                     ▼
+   Working SISU V1       Trained Repair Model
+        │                     │
+        └──────────┬──────────┘
+                   │
+                   ▼
+         FUTURE INTEGRATION
+
+
+# v1 Execution Pipeline
+              USER REQUEST
+                   │
+                   ▼
+            RUST CLI (INPUT)
+                   │
+                   ▼
+              TASK PLANNER
+                   │
+          LLM generates plan
+                   │
+          Rust validates plan
+                   │
+                   ▼
+             TASK EXECUTOR
+                   │
+            Generate code
+                   │
+                   ▼
+             WORKSPACE
+                   │
+          Write / modify files
+                   │
+                   ▼
+          SANDBOX + VERIFIER
+                   │
+             Run checks
+                   │
+              ┌────┴────┐
+              │         │
+             PASS      FAIL
+              │         │
+              │         ▼
+              │     ERROR HANDLER
+              │         │
+              │     REPAIR WITH LLM
+              │         │
+              │     RE-VERIFY
+              │         │
+              └────┬────┘
+                   │
+                   ▼
+           PRESENT RESULTS
+
