@@ -1,6 +1,6 @@
 use sisu_core::{
-    EditorOutcome, Mode, PROJECT_SYSTEM_PROMPT, call_model, collect_prompt, execute_milestones,
-    parse_project_plan, persist_plan, select_mode,
+    EditorOutcome, LlmConfig, Mode, PROJECT_SYSTEM_PROMPT, call_model, collect_prompt,
+    execute_milestones, parse_project_plan, persist_plan, select_mode,
 };
 
 #[tokio::main]
@@ -22,7 +22,8 @@ async fn main() {
 
                 match current_mode {
                     Mode::General => {
-                        let response = call_model(model_name, prompt, None, false).await;
+                        let response =
+                            call_model(model_name, prompt, None, LlmConfig::conversational()).await;
                         println!("{}", response);
                     }
                     Mode::Project => {
@@ -30,7 +31,7 @@ async fn main() {
                             model_name,
                             prompt,
                             Some(PROJECT_SYSTEM_PROMPT.to_string()),
-                            true,
+                            LlmConfig::deterministic(),
                         )
                         .await;
 

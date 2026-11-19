@@ -1,6 +1,7 @@
 use ollama_rs::{
     Ollama,
     generation::{completion::request::GenerationRequest, parameters::FormatType},
+    models::ModelOptions,
 };
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -41,27 +42,50 @@ pub enum TaskStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Milestone {
-    pub id: String,
-    pub title: String,
-    pub description: String,
-    pub depends_on: Vec<String>,
-    pub done_when: Vec<String>,
+    id: String,
+    title: String,
+    description: String,
+    depends_on: Vec<String>,
+    done_when: Vec<String>,
     #[serde(default)]
-    pub status: TaskStatus,
+    status: TaskStatus,
     #[serde(default)]
-    pub attempts: u32, // Tracks how many compiler/test retries this milestone took
+    attempts: u32, // Tracks how many compiler/test retries this milestone took
     #[serde(default)]
-    pub artifacts: Vec<String>, // Files created/modified during this milestone (e.g., "src/main.rs")
+    artifacts: Vec<String>, // Files created/modified during this milestone (e.g., "src/main.rs")
     #[serde(default)]
-    pub last_error: Option<String>, // Captures compiler/sandbox stderr if it failed
+    last_error: Option<String>, // Captures compiler/sandbox stderr if it failed
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectPlan {
-    pub goal: String,
-    pub language: String,      // e.g. "rust", "python", "typescript", "cpp"
-    pub check_command: String, // e.g. "cargo check", "python -m py_compile", "npx tsc --noEmit"
-    pub milestones: Vec<Milestone>,
+    goal: String,
+    language: String,      // e.g. "rust", "python", "typescript", "cpp"
+    check_command: String, // e.g. "cargo check", "python -m py_compile", "npx tsc --noEmit"
+    milestones: Vec<Milestone>,
+}
+
+pub struct LlmConfig {
+    temperature: f32,
+    num_ctx: u64,
+    json_mode: bool,
+}
+
+impl LlmConfig {
+    pub fn deterministic() -> Self {
+        Self {
+            temperature: 0.0,
+            num_ctx: 8192,
+            json_mode: true,
+        }
+    }
+    pub fn conversational() -> Self {
+        Self {
+            temperature: 0.7,
+            num_ctx: 4096,
+            json_mode: false,
+        }
+    }
 }
 
 /*pub makes the function accessible outside sisu-core.
@@ -222,14 +246,18 @@ pub async fn call_model(
     model: &str,
     user_prompt: String,
     system_prompt: Option<String>,
-    json_mode: bool,
+    config: LlmConfig,
 ) -> String {
     let ollama = Ollama::default(); // localhost:11434
-    let mut request = GenerationRequest::new(model.to_string(), user_prompt);
+    let options = ModelOptions::default()
+        .temperature(config.temperature)
+        .num_ctx(config.num_ctx);
+
+    let mut request = GenerationRequest::new(model.to_string(), user_prompt).options(options);
     if let Some(sys) = system_prompt {
         request = request.system(sys);
     }
-    if json_mode {
+    if config.json_mode {
         request = request.format(FormatType::Json);
     }
 
@@ -313,7 +341,7 @@ pub async fn execute_milestones(model: &str, project_dir: &str, plan: &mut Proje
             model,
             task_prompt,
             Some(EXECUTOR_SYSTEM_PROMPT.to_string()),
-            true,
+            LlmConfig::deterministic(),
         )
         .await;
         println!("Result:\n{}\n", result);
