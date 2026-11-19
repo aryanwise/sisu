@@ -12,3 +12,7 @@ __pycache__/
 
 # Editor
 .vscode/
+
+# Test project
+project/
+code_milestone_response.txt

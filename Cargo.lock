@@ -1163,6 +1163,8 @@ name = "sisu-cli"
 version = "0.1.0"
 dependencies = [
  "ollama-rs",
+ "serde",
+ "serde_json",
  "sisu-core",
  "tokio",
  "tokio-stream",
@@ -1173,6 +1175,8 @@ name = "sisu-core"
 version = "0.1.0"
 dependencies = [
  "ollama-rs",
+ "serde",
+ "serde_json",
  "tokio",
  "tokio-stream",
 ]
