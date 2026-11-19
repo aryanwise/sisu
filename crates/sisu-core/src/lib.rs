@@ -9,6 +9,6 @@ pub mod workspace;
 
 pub use llm::prompts::{EXECUTOR_SYSTEM_PROMPT, PROJECT_SYSTEM_PROMPT};
 pub use llm::{LlmConfig, call_model};
-pub use models::{Milestone, ProjectPlan, TaskStatus};
+pub use models::{FileWrite, GeneratedPayload, Milestone, ProjectPlan, TaskStatus};
 pub use orchestrator::{create_plan, execute_milestones};
 pub use state::{parse_project_plan, persist_plan};

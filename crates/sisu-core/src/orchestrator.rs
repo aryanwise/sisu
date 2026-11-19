@@ -38,10 +38,11 @@ pub async fn execute_milestones(model: &str, project_dir: &str, plan: &mut Proje
         println!("=> Executing [{}]: {}", milestone.id, milestone.title);
 
         let task_prompt = format!(
-            "Project Goal: {}\nTarget Language: {}\nDefault Check Command: {}\nMilestone [{}]: {}\nDescription: {}\nDone when: {:?}",
+            "Project Goal: {}\nTarget Language: {}\nDefault Check Command: {}\nDeclared Project Dependencies: {:?}\nMilestone [{}]: {}\nDescription: {}\nDone when: {:?}",
             plan.goal,
             plan.language,
             plan.check_command,
+            plan.dependencies,
             milestone.id,
             milestone.title,
             milestone.description,

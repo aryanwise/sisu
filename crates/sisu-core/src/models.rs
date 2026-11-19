@@ -32,5 +32,22 @@ pub struct ProjectPlan {
     pub(crate) goal: String,
     pub(crate) language: String, // e.g. "rust", "python", "typescript", "cpp"
     pub(crate) check_command: String, // e.g. "cargo check", "python -m py_compile", "npx tsc --noEmit"
+    #[serde(default)]
+    pub(crate) dependencies: Vec<String>, // Package names, separate from milestone depends_on IDs
     pub(crate) milestones: Vec<Milestone>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GeneratedPayload {
+    pub(crate) files: Vec<FileWrite>,
+    #[serde(default)]
+    pub(crate) add_dependencies: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FileWrite {
+    pub(crate) path: String,
+    pub(crate) content: String,
 }

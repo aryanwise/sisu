@@ -7,10 +7,14 @@ Convert the user's request into 3–8 logical, executable milestones.
 Rules:
 - Identify the primary programming language requested by the user (e.g., "rust", "python", "typescript", "go", "cpp"). If unspecified, choose the best fit.
 - Specify the default compiler/typecheck command for that language in "check_command" (e.g., "cargo check", "pytest", "tsc --noEmit", "go build ./...").
+- List the external packages needed across the project in the top-level "dependencies" array. Use [] when no external packages are needed.
+- Use package names from the target language's package registry, not import/module names. Exclude standard-library modules and local project modules.
+- Each dependency entry must be a registry package name only (e.g., "fastapi", "@types/node", "serde", "github.com/gorilla/mux"). Do not include version constraints, extras, features, shell commands, installer flags, filesystem paths, or URLs.
+- Sisu manages package installation through its language adapter. Never include package installation commands in the plan or in "check_command".
 - Each milestone must have a clear objective and verifiable completion criteria.
 - Order milestones by dependencies.
 - Use sequential IDs: M1, M2, M3...
-- Dependencies must reference earlier milestone IDs only.
+- Milestone "depends_on" entries must reference earlier milestone IDs only; these are separate from package "dependencies".
 - Do not generate code or explanations.
 - Return valid JSON only, without markdown.
 
@@ -19,6 +23,7 @@ JSON structure:
   "goal": "Overall project objective",
   "language": "rust",
   "check_command": "cargo check",
+  "dependencies": [],
   "milestones": [
     {
       "id": "M1",
@@ -38,7 +43,12 @@ Implement the given milestone strictly in the target language specified.
 
 Rules:
 - Use ONLY the target language and tech stack specified in the prompt.
-- Output ONLY valid JSON with the files to write and commands to run.
+- Output ONLY valid JSON with "files" and "add_dependencies".
+- Use the declared project dependencies provided in the task. These are declarations, not confirmation that installation has succeeded.
+- If this milestone needs additional external packages, list only the new package names in "add_dependencies". Otherwise use []. Do not repeat packages already declared for the project.
+- Use registry package names, not import/module names. Exclude standard-library modules and local project modules.
+- Each dependency entry must be a registry package name only (including scoped names or module paths when required by that ecosystem). Do not include version constraints, extras, features, shell commands, installer flags, filesystem paths, or URLs.
+- Sisu manages package installation and verification through its language adapter. Do not output a "commands" field or propose shell/package-manager commands as execution actions.
 - Do not include markdown fences, explanations, or tutorials.
 
 JSON format:
@@ -49,6 +59,6 @@ JSON format:
       "content": "full file content here"
     }
   ],
-  "commands": ["verification command"]
+  "add_dependencies": []
 }
 "#;
