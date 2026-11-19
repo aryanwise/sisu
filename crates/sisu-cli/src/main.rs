@@ -1,6 +1,10 @@
+mod display;
+mod input;
+
+use input::{EditorOutcome, Mode, collect_prompt, select_mode};
 use sisu_core::{
-    EditorOutcome, LlmConfig, Mode, PROJECT_SYSTEM_PROMPT, call_model, collect_prompt,
-    execute_milestones, parse_project_plan, persist_plan, select_mode,
+    LlmConfig, PROJECT_SYSTEM_PROMPT, call_model, execute_milestones, parse_project_plan,
+    persist_plan,
 };
 
 #[tokio::main]

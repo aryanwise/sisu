@@ -1,0 +1,118 @@
+# v1 file struct
+sisu/
+├── Cargo.toml
+├── crates/
+│   ├── sisu-cli/
+│   │   └── src/
+│   │       ├── main.rs          # Start session, connect input to core
+│   │       ├── input.rs         # Mode selection, multiline input, commands
+│   │       └── display.rs       # Progress, diagnostics, final results
+│   │
+│   └── sisu-core/
+│       ├── src/
+│       │   ├── lib.rs          # Declare modules and expose public API
+│       │   ├── models.rs       # Plans, milestones, actions, outcomes
+│       │   ├── orchestrator.rs # Plan → execute → verify → repair
+│       │   ├── state.rs        # Save/load plans and execution history
+│       │   │
+│       │   ├── llm/
+│       │   │   ├── mod.rs      # Model request/response interface
+│       │   │   ├── ollama.rs   # Ollama-specific implementation
+│       │   │   └── prompts.rs  # Planning, generation, repair prompts
+│       │   │
+│       │   ├── workspace/
+│       │   │   ├── mod.rs
+│       │   │   ├── context.rs  # Read/select workspace content
+│       │   │   ├── files.rs    # Validate and apply file actions
+│       │   │   └── snapshot.rs # Isolated working copy and checkpoints
+│       │   │
+│       │   ├── languages/
+│       │   │   ├── mod.rs      # Adapter contract and registry
+│       │   │   ├── rust.rs     # Rust project tools and diagnostics
+│       │   │   ├── python.rs   # Python project tools and diagnostics
+│       │   │   └── ...         # Add other adapters incrementally
+│       │   │
+│       │   ├── syntax/
+│       │   │   ├── mod.rs      # Parser selection by file/language
+│       │   │   └── queries/    # Language-specific Tree-sitter queries
+│       │   │
+│       │   └── sandbox/
+│       │       ├── mod.rs      # Execution contract and policies
+│       │       ├── runner.rs   # Process lifecycle, output, timeouts
+│       │       └── backend.rs  # Platform isolation implementation
+│       │
+│       └── tests/
+│           ├── execution.rs   # Verify complete execution scenarios
+│           └── recovery.rs    # Interrupted execution and resume
+│
+├── research/
+│   └── repair-lab/
+└── docs/
+    └── architecture.md
+
+# Development Tracks
+              PROJECT SISU
+                   │
+        ┌──────────┴──────────┐
+        │                     │
+        ▼                     ▼
+   RUST DEVELOPMENT      PYTHON RESEARCH
+        │                     │
+   Task Planning         Error Datasets
+   Model APIs            Neural Models
+   Tool Execution        Model Training
+   Verification          Evaluation
+        │                     │
+        ▼                     ▼
+   Working SISU V1       Trained Repair Model
+        │                     │
+        └──────────┬──────────┘
+                   │
+                   ▼
+         FUTURE INTEGRATION
+
+
+# v1 Execution Pipeline
+              USER REQUEST
+                   │
+                   ▼
+            RUST CLI (INPUT)
+                   │
+                   ▼
+              TASK PLANNER
+                   │
+          LLM generates plan
+                   │
+          Rust validates plan
+                   │
+                   ▼
+             TASK EXECUTOR
+                   │
+            Generate code
+                   │
+                   ▼
+             WORKSPACE
+                   │
+          Write / modify files
+                   │
+                   ▼
+          SANDBOX + VERIFIER
+                   │
+             Run checks
+                   │
+              ┌────┴────┐
+              │         │
+             PASS      FAIL
+              │         │
+              │         ▼
+              │     ERROR HANDLER
+              │         │
+              │     REPAIR WITH LLM
+              │         │
+              │     RE-VERIFY
+              │         │
+              └────┬────┘
+                   │
+                   ▼
+           PRESENT RESULTS
+

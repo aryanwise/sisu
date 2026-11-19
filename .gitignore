@@ -5,6 +5,8 @@ target/
 .venv/
 __pycache__/
 *.pyc
+.DS_Store
+crates/.DS_Store
 
 # Secrets
 .env
