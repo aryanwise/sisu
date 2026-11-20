@@ -7,8 +7,11 @@ pub mod state;
 pub mod syntax;
 pub mod workspace;
 
-pub use llm::prompts::{EXECUTOR_SYSTEM_PROMPT, PROJECT_SYSTEM_PROMPT};
+pub use llm::prompts::{EXECUTOR_SYSTEM_PROMPT, PROJECT_SYSTEM_PROMPT, REPAIR_SYSTEM_PROMPT};
 pub use llm::{LlmConfig, call_model};
 pub use models::{FileWrite, GeneratedPayload, Milestone, ProjectPlan, TaskStatus};
-pub use orchestrator::{create_plan, execute_milestones};
+pub use orchestrator::{
+    FrontierDebugReport, LlmClient, Orchestrator, OrchestratorConfig, RunOutcome, create_plan,
+    load_plan,
+};
 pub use state::{parse_project_plan, persist_plan};
