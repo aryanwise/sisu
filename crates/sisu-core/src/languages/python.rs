@@ -160,19 +160,33 @@ impl LanguageAdapter for PythonAdapter {
     }
 
     async fn scaffold(&self, project_dir: &Path, runner: &SandboxRunner) -> Result<(), String> {
-        if !project_dir.join("pyproject.toml").exists() {
-            let init = runner
-                .run_host_tool("uv", &["init", "--bare"], project_dir)
+        let venv_python = project_dir.join(".venv/bin/python");
+        if !venv_python.exists() {
+            let venv = runner
+                .run_host_tool("uv", &["venv", ".venv"], project_dir)
                 .await?;
-            if init.exit_code != 0 {
-                return Err(format!("uv init failed: {}", init.stderr));
+            if venv.exit_code != 0 {
+                return Err(format!(
+                    "Failed to create .venv via uv: {}",
+                    venv.stderr.trim()
+                ));
             }
         }
 
-        if !project_dir.join(".venv").exists() {
-            let venv = runner.run_host_tool("uv", &["venv"], project_dir).await?;
-            if venv.exit_code != 0 {
-                return Err(format!("uv venv failed: {}", venv.stderr));
+        let venv_pytest = project_dir.join(".venv/bin/pytest");
+        if !venv_pytest.exists() {
+            let install = runner
+                .run_host_tool(
+                    "uv",
+                    &["pip", "install", "--python", ".venv/bin/python", "pytest"],
+                    project_dir,
+                )
+                .await?;
+            if install.exit_code != 0 {
+                return Err(format!(
+                    "Failed to install pytest into .venv: {}",
+                    install.stderr.trim()
+                ));
             }
         }
 
@@ -189,7 +203,7 @@ impl LanguageAdapter for PythonAdapter {
             return Ok(());
         }
 
-        let mut args = vec!["add"];
+        let mut args = vec!["pip", "install", "--python", ".venv/bin/python"];
         args.extend(deps.iter().map(|s| s.as_str()));
 
         let out = runner.run_host_tool("uv", &args, project_dir).await?;
@@ -202,13 +216,16 @@ impl LanguageAdapter for PythonAdapter {
 
         Ok(())
     }
-
     async fn check_static(
         &self,
         project_dir: &Path,
         runner: &SandboxRunner,
     ) -> Result<Vec<Diagnostic>, String> {
-        let venv_python = project_dir.join(".venv/bin/python");
+        // Canonicalize `project_dir` (NOT `.venv/bin/python`, which is a symlink to base Python)
+        let abs_project = project_dir
+            .canonicalize()
+            .unwrap_or_else(|_| project_dir.to_path_buf());
+        let venv_python = abs_project.join(".venv/bin/python");
         let venv_python_str = venv_python.to_string_lossy().into_owned();
 
         let mut args = vec!["--outputjson"];
@@ -236,11 +253,18 @@ impl LanguageAdapter for PythonAdapter {
         runner: &SandboxRunner,
     ) -> Result<Vec<Diagnostic>, String> {
         let venv_pytest = project_dir.join(".venv/bin/pytest");
-        let pytest_bin = if venv_pytest.exists() {
-            venv_pytest.to_string_lossy().into_owned()
-        } else {
-            "pytest".to_string()
-        };
+        if !venv_pytest.exists() {
+            return Err(format!(
+                "Harness error: '{}' not found. Ensure scaffold() installed pytest.",
+                venv_pytest.display()
+            ));
+        }
+
+        let pytest_bin = venv_pytest
+            .canonicalize()
+            .unwrap_or(venv_pytest)
+            .to_string_lossy()
+            .into_owned();
 
         let out = runner
             .run_isolated(&pytest_bin, &["-q", "--tb=short"], project_dir)
@@ -258,9 +282,17 @@ impl LanguageAdapter for PythonAdapter {
             }]);
         }
 
-        // Exit code 0 = all tests passed; Exit code 5 = no tests collected yet
+        // Exit code 0 = all tests passed; Exit code 5 = no tests collected yet (normal for M1 setup)
         if out.exit_code == 0 || out.exit_code == 5 {
             return Ok(vec![]);
+        }
+
+        // Never send OS/sandbox launch failures into the LLM repair loop
+        if out.stderr.contains("execvp()") || out.exit_code == 71 || out.exit_code == 127 {
+            return Err(format!(
+                "Sandbox failed to launch pytest: {}",
+                out.stderr.trim()
+            ));
         }
 
         Ok(parse_pytest_output(&out.stdout, &out.stderr))
