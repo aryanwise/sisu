@@ -6,48 +6,50 @@ pub enum TaskStatus {
     #[default]
     Pending,
     InProgress,
+    /// Model output exists, but it has not been applied or verified.
+    Generated,
     Completed,
     Failed(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Milestone {
-    pub(crate) id: String,
-    pub(crate) title: String,
-    pub(crate) description: String,
-    pub(crate) depends_on: Vec<String>,
-    pub(crate) done_when: Vec<String>,
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub depends_on: Vec<String>,
+    pub done_when: Vec<String>,
     #[serde(default)]
-    pub(crate) status: TaskStatus,
+    pub status: TaskStatus,
     #[serde(default)]
-    attempts: u32, // Tracks how many compiler/test retries this milestone took
+    pub attempts: u32, // Tracks how many compiler/test retries this milestone took
     #[serde(default)]
-    artifacts: Vec<String>, // Files created/modified during this milestone (e.g., "src/main.rs")
+    pub artifacts: Vec<String>, // Files created/modified during this milestone (e.g., "src/main.rs")
     #[serde(default)]
-    last_error: Option<String>, // Captures compiler/sandbox stderr if it failed
+    pub last_error: Option<String>, // Captures compiler/sandbox stderr if it failed
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectPlan {
-    pub(crate) goal: String,
-    pub(crate) language: String, // e.g. "rust", "python", "typescript", "cpp"
-    pub(crate) check_command: String, // e.g. "cargo check", "python -m py_compile", "npx tsc --noEmit"
+    pub goal: String,
+    pub language: String,      // e.g. "rust", "python", "typescript", "cpp"
+    pub check_command: String, // e.g. "cargo check", "python -m py_compile", "npx tsc --noEmit"
     #[serde(default)]
-    pub(crate) dependencies: Vec<String>, // Package names, separate from milestone depends_on IDs
-    pub(crate) milestones: Vec<Milestone>,
+    pub dependencies: Vec<String>, // Package names, separate from milestone depends_on IDs
+    pub milestones: Vec<Milestone>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GeneratedPayload {
-    pub(crate) files: Vec<FileWrite>,
+    pub files: Vec<FileWrite>,
     #[serde(default)]
-    pub(crate) add_dependencies: Vec<String>,
+    pub add_dependencies: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FileWrite {
-    pub(crate) path: String,
-    pub(crate) content: String,
+    pub path: String,
+    pub content: String,
 }

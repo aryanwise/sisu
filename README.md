@@ -1,8 +1,34 @@
-sisu
+# sisu
 
-It is is a model-agnostic, tool-augmented execution engine designed to help AI models complete complex tasks reliably from start to finish.
+Sisu is being built as a model-agnostic, tool-augmented execution engine to help AI models complete complex tasks reliably from start to finish.
 
-The model is interchangeable. The execution infrastructure is the product.
+The current implementation is an Ollama-backed CLI for persistent chat, explicit workspace context, and validated project plans. Sandbox execution, generated file application, dependency installation, and verification are not implemented yet.
+
+## Try the CLI
+
+Use Rust 1.89 or newer and a reachable Ollama server with the selected model installed:
+
+```sh
+cargo build --release -p sisu-cli
+./target/release/sisu
+./target/release/sisu --help
+./target/release/sisu --model qwen2.5-coder:7b chat "Explain this project"
+./target/release/sisu plan "Build a small HTTP API"
+```
+
+In the interactive editor, enter a prompt and put `/send` on its own line. Use `/help` for commands, `/context add <path>` to include a workspace file, `/mode project` to plan, and Ctrl+C to cancel an active request. Sessions are saved under the selected workspace's `.sisu/` directory. List them with `sisu sessions list` and continue with `sisu --session <id>`. `--json` provides newline-delimited events for one-shot commands.
+
+Configuration supports model, Ollama endpoint, timeout, and context limit, with CLI flags overriding environment and project/user JSON settings. See [CLI flow and commands](docs/sisu-cli-flow.md) for exact behavior, examples, configuration, storage, recovery, and current limitations. See [architecture](docs/architecture.md) for implemented and reserved components.
+
+```sh
+cargo test --workspace
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+```
+
+## Direction
+
+The model is intended to be interchangeable. The execution infrastructure is the product.
 
 That means sisu could work with:
 

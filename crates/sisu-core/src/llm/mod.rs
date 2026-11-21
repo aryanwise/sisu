@@ -1,12 +1,15 @@
 mod ollama;
 pub mod prompts;
 
-pub use ollama::call_model;
+use serde::{Deserialize, Serialize};
 
+pub use ollama::{LlmError, ModelClient, call_model};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LlmConfig {
-    temperature: f32,
-    num_ctx: u64,
-    json_mode: bool,
+    pub temperature: f32,
+    pub num_ctx: u64,
+    pub json_mode: bool,
 }
 
 impl LlmConfig {
@@ -24,4 +27,18 @@ impl LlmConfig {
             json_mode: false,
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MessageRole {
+    System,
+    User,
+    Assistant,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelMessage {
+    pub role: MessageRole,
+    pub content: String,
 }

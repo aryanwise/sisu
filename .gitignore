@@ -18,3 +18,7 @@ crates/.DS_Store
 # Test project
 project/
 code_milestone_response.txt
+
+# Local CLI conversation state (project configuration can be committed)
+.sisu/sessions/
+.sisu/history.txt
